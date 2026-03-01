@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veronica System Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00e1ff;
+            --error: #ff3333;
+            --bg: #030303;
+            --glass: rgba(0, 225, 255, 0.05);
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--bg); font-family: 'Roboto Mono', monospace; color: var(--primary); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        
+        /* The UI Container */
+        #viewport { width: 450px; text-align: center; border: 1px solid rgba(0, 225, 255, 0.3); padding: 3rem; background: var(--glass); backdrop-filter: blur(10px); }
+        .screen { display: none; }
+        .active { display: block; animation: fadeIn 0.4s ease-in; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        input { background: transparent; border: none; border-bottom: 2px solid var(--primary); color: #fff; padding: 15px; width: 100%; text-align: center; font-size: 1.2rem; outline: none; margin-bottom: 20px; text-transform: uppercase;}
+        button { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 12px 30px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        button:hover { background: var(--primary); color: #000; }
+
+        #log { font-size: 1rem; color: #aaa; text-align: left; }
+        .result-card { border: 1px solid var(--primary); padding: 20px; margin-top: 20px; color: #fff; }
+        .error-card { border: 1px solid var(--error); padding: 20px; margin-top: 20px; color: var(--error); }
+    </style>
+</head>
+<body>
+
+    <audio id="sound-error" src="error.mp3"></audio>
+
+    <div id="viewport">
+        <div id="screen-1" class="screen active">
+            <h2>SYSTEM VERONICA</h2>
+            <p>READY TO ACCESS DATABANK.</p>
+            <button onclick="goto(2)">INITIALIZE</button>
+        </div>
+
+        <div id="screen-2" class="screen">
+            <h3>INPUT PROTOCOL</h3>
+            <input type="text" id="user-input" placeholder="SUBJECT NAME" autocomplete="off">
+            <button onclick="processData()">EXECUTE QUERY</button>
+        </div>
+
+        <div id="screen-3" class="screen">
+            <div id="log"></div>
+        </div>
+
+        <div id="screen-4" class="screen">
+            <div id="display-area"></div>
+            <button onclick="goto(2)" style="margin-top:20px;">NEW QUERY</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Database ---
+        const database = {
+            "tushar": "24/05/2005",
+            "suhani": "08/08/2007",
+            "meethi": "25/12/2006",
+            "tanishqua": "25/12/2006",
+            "bhoomi": "18/03/2004",
+            "archita": "18/03/2004",
+            "minakshi": "15/09/2006",
+            "raunak": "15/05/2006",
+            "utkarsh": "18/03/2006"
+        };
+
+        // --- 2. State & Navigation ---
+        function goto(n) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + n).classList.add('active');
+            if(n === 2) document.getElementById('user-input').focus();
+        }
+
+        // Handle Enter Key
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processData();
+        });
+
+        // --- 3. Processing ---
+        async function processData() {
+            const input = document.getElementById('user-input').value.toLowerCase().trim();
+            if (!input) return;
+
+            goto(3);
+            const log = document.getElementById('log');
+            log.innerHTML = "<p>> Encrypting connection...</p><p>> Querying DB...</p>";
+
+            await new Promise(r => setTimeout(r, 1500));
+
+            const display = document.getElementById('display-area');
+            goto(4);
+
+            if (database[input]) {
+                display.innerHTML = `<div class="result-card"><h3>IDENTITY VERIFIED</h3><p>SUBJECT: ${input.toUpperCase()}</p><p>DOB: ${database[input]}</p></div>`;
+            } else {
+                document.getElementById('sound-error').play().catch(()=>{});
+                display.innerHTML = `<div class="error-card"><h3>ACCESS DENIED</h3><p>SUBJECT '${input.toUpperCase()}' NOT FOUND.</p></div>`;
+            }
+        }
+    </script>
+</body>
+</html>
